@@ -1,0 +1,14 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DS3ConnectionInfo.MainWindow"
+        Title="DS3 Connection Info"
+        Width="500" Height="400"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel LastChildFill="True" Margin="8">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <TextBlock x:Name="textGameState" Text="DS3: CLOSED" Foreground="#FFA500" FontWeight="SemiBold" />
+        </StackPanel>
+        <TextBlock x:Name="textPlayerCount" DockPanel.Dock="Top" Text="Players in session: 0" FontWeight="Bold" Margin="0,0,0,8" />
+        <ListBox x:Name="listPlayers" />
+    </DockPanel>
+</Window>

@@ -8,6 +8,9 @@ A simple tool showing Dark Souls III online session information, player count an
 - Displays Steam names of connected players
 - Detects DS3 process and connects via Steam API
 
+<!--image-->
+![DS3ConnectionInfo](./images/screenshot.png)
+
 ## Installation
 
 ### Windows

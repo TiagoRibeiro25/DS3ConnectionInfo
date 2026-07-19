@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -15,13 +13,13 @@ namespace DS3ConnectionInfo
     public partial class MainWindow : Window
     {
         private DispatcherTimer gameStartTimer, updateTimer;
-        private ObservableCollection<string> playerNames = new ObservableCollection<string>();
+        private ObservableCollection<string> playerEntries = new ObservableCollection<string>();
 
         public MainWindow()
         {
             InitializeComponent();
 
-            listPlayers.ItemsSource = playerNames;
+            listPlayers.ItemsSource = playerEntries;
             Title = "DS3 Connection Info";
 
             gameStartTimer = new DispatcherTimer();
@@ -45,10 +43,13 @@ namespace DS3ConnectionInfo
 
                 Dispatcher.UIThread.Post(() =>
                 {
-                    playerNames.Clear();
+                    playerEntries.Clear();
                     textPlayerCount.Text = $"Players in session: {players.Count}";
                     foreach (var p in players)
-                        playerNames.Add(p.SteamName);
+                    {
+                        string relay = p.IsRelay ? " [relay]" : "";
+                        playerEntries.Add($"{p.SteamName} ({p.SteamId64}){relay}");
+                    }
                 });
             }
             catch { }

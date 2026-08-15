@@ -1,7 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -14,6 +13,8 @@ namespace DS3ConnectionInfo
     {
         private DispatcherTimer gameStartTimer, updateTimer;
         private ObservableCollection<string> playerEntries = new ObservableCollection<string>();
+        private Process gameProcess;
+        private bool steamInitialized;
 
         public MainWindow()
         {
@@ -31,7 +32,13 @@ namespace DS3ConnectionInfo
             updateTimer.Interval = TimeSpan.FromSeconds(1);
             updateTimer.Tick += UpdateTimer_Tick;
 
-            Closed += (s, e) => Settings.Default.Save();
+            Closed += (s, e) =>
+            {
+                if (steamInitialized)
+                    SteamAPI.Shutdown();
+
+                gameProcess?.Dispose();
+            };
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e)
@@ -59,15 +66,18 @@ namespace DS3ConnectionInfo
         {
             try
             {
-                if (DS3Interop.TryAttach() && DS3Interop.FindWindow())
+                if (gameProcess == null)
                 {
-                    DS3Interop.Process.EnableRaisingEvents = true;
-                    DS3Interop.Process.Exited += (s, ev) =>
+                    gameProcess = FindGameProcess();
+                    if (gameProcess == null)
+                        return;
+
+                    gameProcess.EnableRaisingEvents = true;
+                    gameProcess.Exited += (s, ev) =>
                     {
                         Dispatcher.UIThread.Post(() =>
                         {
                             updateTimer.Stop();
-                            SteamAPI.Shutdown();
                             Close();
                         });
                     };
@@ -77,15 +87,29 @@ namespace DS3ConnectionInfo
                         textGameState.Text = "DS3: RUNNING";
                         textGameState.Foreground = Brushes.LawnGreen;
                     });
-
-                    File.WriteAllText("steam_appid.txt", "374320");
-                    if (!SteamAPI.Init()) return;
-
-                    updateTimer.Start();
-                    gameStartTimer.Stop();
                 }
+
+                steamInitialized = SteamAPI.Init();
+                if (!steamInitialized)
+                    return;
+
+                updateTimer.Start();
+                gameStartTimer.Stop();
             }
             catch { }
+        }
+
+        private static Process FindGameProcess()
+        {
+            var processes = Process.GetProcessesByName("DarkSoulsIII");
+            if (processes.Length == 0)
+                return null;
+
+            var game = processes[0];
+            foreach (var process in processes.Skip(1))
+                process.Dispose();
+
+            return game;
         }
     }
 }

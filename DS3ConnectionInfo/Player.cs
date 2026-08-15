@@ -1,18 +1,15 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Steamworks;
 
 namespace DS3ConnectionInfo
 {
     public class Player
     {
-        private static Dictionary<CSteamID, Player> activePlayers = new Dictionary<CSteamID, Player>();
+        private static readonly Dictionary<CSteamID, Player> activePlayers = new Dictionary<CSteamID, Player>();
 
         public string SteamName { get; private set; }
         public ulong SteamId64 { get; private set; }
         public bool IsRelay { get; private set; }
-        public string RelayText => IsRelay ? "Yes" : "";
 
         private Player(CSteamID steamID, P2PSessionState_t session)
         {
@@ -23,7 +20,7 @@ namespace DS3ConnectionInfo
 
         public static IEnumerable<Player> ActivePlayers()
         {
-            return activePlayers.Values.AsEnumerable();
+            return activePlayers.Values;
         }
 
         public static void UpdatePlayerList()
